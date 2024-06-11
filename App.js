@@ -1,4 +1,5 @@
 import * as React from "react";
+import { theme } from "./GlobalStyles";
 import * as SQLite from "expo-sqlite";
 import { SQLiteProvider } from "expo-sqlite/next";
 import { StatusBar } from "expo-status-bar";
@@ -56,7 +57,18 @@ export default function App() {
         }
       >
         <SQLiteProvider databaseName="myRecipeDB.db" useSuspense={true}>
-          <Stack.Navigator>
+          <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: theme.colors.dark,
+              },
+              headerTintColor: "#fff",
+              headerTitleStyle: {
+                fontWeight: "bold",
+              },
+              headerTitleAlign: "center",
+            }}
+          >
             <Stack.Screen
               name="Home"
               component={Home}

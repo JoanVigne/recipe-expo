@@ -1,4 +1,5 @@
 import { Text, TouchableOpacity, View } from "react-native";
+import RecipeItem from "./RecipeItem";
 
 export default function RecipeList({ recipes }) {
   return (
@@ -10,8 +11,9 @@ export default function RecipeList({ recipes }) {
             activeOpacity={0.7}
             onLongPress={() => console.log("long press")}
           >
-            <Text>{recipe.name}</Text>
-            <Text>{recipe.instructions}</Text>
+            <RecipeItem recipe={recipe} />
+            {/*   <Text>{recipe.name}</Text>
+            <Text>{recipe.instructions}</Text> */}
           </TouchableOpacity>
         );
       })}

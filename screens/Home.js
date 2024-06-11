@@ -1,9 +1,10 @@
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import CreateRecipeButtonAndModal from "../components/CreateRecipeButtonAndModal";
 import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite/next";
 import RecipeList from "../components/RecipeList";
 import IngredientList from "../components/IngredientList";
+import { theme } from "../GlobalStyles";
 
 export default function Home() {
   console.log("test test");
@@ -31,11 +32,24 @@ export default function Home() {
     });
   }
   return (
-    <ScrollView>
-      <Text> Home </Text>
-      <RecipeList recipes={recipes} deleteRecipe={deleteRecipe} />
+    <ScrollView style={styles.container}>
       <CreateRecipeButtonAndModal />
+      <Text style={styles.title}> All the recipes </Text>
+      <RecipeList recipes={recipes} deleteRecipe={deleteRecipe} />
+
       <IngredientList ingredients={ingredients} />
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: theme.fontSize.large,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+});

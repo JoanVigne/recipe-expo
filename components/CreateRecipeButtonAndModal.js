@@ -125,10 +125,11 @@ export default function RecipeModal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 52,
+    margin: 15,
     /*   justifyContent: "center",
     alignItems: "center", */
   },
+
   centeredView: {
     flex: 1,
     justifyContent: "center",
