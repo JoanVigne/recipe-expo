@@ -1,7 +1,7 @@
 import { Text, TouchableOpacity, View } from "react-native";
 import RecipeItem from "./RecipeItem";
 
-export default function RecipeList({ recipes }) {
+export default function RecipeList({ recipes, deleteRecipe, createRecipe }) {
   return (
     <View>
       {recipes.map((recipe, i) => {

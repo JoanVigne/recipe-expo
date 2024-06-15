@@ -31,9 +31,21 @@ export default function Home() {
       await getData();
     });
   }
+  async function createRecipe(recipe) {
+    db.withTransactionAsync(async () => {
+      const { name, description, ingredients } = recipe;
+      // Assuming the table has columns for name, description, and a way to link ingredients
+      await db.runAsync(
+        "INSERT INTO recipes (name, description) VALUES (?, ?);",
+        [name, description]
+      );
+      // If you have a separate process to handle ingredients, add it here
+      await getData();
+    });
+  }
   return (
     <ScrollView style={styles.container}>
-      <CreateRecipeButtonAndModal />
+      <CreateRecipeButtonAndModal createRecipe={createRecipe} />
       <Text style={styles.title}> All the recipes </Text>
       <RecipeList recipes={recipes} deleteRecipe={deleteRecipe} />
 
