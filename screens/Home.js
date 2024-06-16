@@ -20,10 +20,10 @@ export default function Home() {
   async function getData() {
     const result = await db.getAllAsync("SELECT * FROM recipes");
     setRecipes(result);
-    console.log(result);
+    console.log("RECIPES RESULT FROM GET DATA :", result);
     const IngredientResult = await db.getAllAsync("SELECT * FROM ingredients");
     setIngredients(IngredientResult);
-    console.log(IngredientResult);
+    console.log("ingrdients RESULT FROM GET DATA ", IngredientResult);
   }
   async function deleteRecipe(id) {
     db.withTransactionAsync(async () => {
@@ -33,13 +33,45 @@ export default function Home() {
   }
   async function createRecipe(recipe) {
     db.withTransactionAsync(async () => {
-      const { name, description, ingredients } = recipe;
-      // Assuming the table has columns for name, description, and a way to link ingredients
-      await db.runAsync(
-        "INSERT INTO recipes (name, description) VALUES (?, ?);",
-        [name, description]
+      const {
+        name,
+        description,
+        category,
+        healthyness,
+        images,
+        instructions,
+        ingredients,
+      } = recipe;
+      // Simple validation example
+      if (
+        !name ||
+        !description ||
+        !category ||
+        !healthyness ||
+        !images ||
+        !instructions ||
+        !ingredients ||
+        ingredients.length === 0
+      ) {
+        throw new Error("Missing required recipe information.");
+      }
+      // Insert into recipes table and get the inserted recipe's ID
+      const result = await db.runAsync(
+        "INSERT INTO recipes (name, description, category, healthyness, images, instructions) VALUES (?, ?, ?, ?, ?, ?);",
+        [name, description, category, healthyness, images, instructions]
       );
-      // If you have a separate process to handle ingredients, add it here
+      const recipeId = result.insertId; // Assuming this is how you get the newly inserted ID, adjust based on your DB API
+
+      // Insert each ingredient for the new recipe
+      for (const ingredient of ingredients) {
+        const { ingredient: ingredientName, quantity, unit } = ingredient;
+        await db.runAsync(
+          "INSERT INTO ingredients (ingredient, quantity, unit, recipe_id) VALUES (?, ?, ?, ?);",
+          [ingredientName, quantity, unit, recipeId]
+        );
+      }
+
+      // Refresh data to reflect the new recipe and its ingredients
       await getData();
     });
   }
