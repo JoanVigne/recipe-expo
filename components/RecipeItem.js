@@ -67,7 +67,17 @@ export default function RecipeItem({ recipe }) {
         </Animated.View>
       </View>
       <View>
-        <Text>Photo peut etre</Text>
+        <View>
+          <Text style={styles.text}>Ingredients:</Text>
+          {Object.entries(JSON.parse(recipe.ingredients)).map(
+            ([ingredient, details]) => (
+              <Text
+                key={ingredient}
+                style={styles.text}
+              >{`${ingredient}: ${details.quantity} ${details.unit}`}</Text>
+            )
+          )}
+        </View>
       </View>
     </View>
   );

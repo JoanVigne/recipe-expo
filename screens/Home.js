@@ -3,11 +3,9 @@ import CreateRecipeButtonAndModal from "../components/CreateRecipeButtonAndModal
 import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite/next";
 import RecipeList from "../components/RecipeList";
-import IngredientList from "../components/IngredientList";
 import { theme } from "../GlobalStyles";
 
 export default function Home() {
-  console.log("test test");
   const [recipes, setRecipes] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const db = useSQLiteContext();
@@ -18,12 +16,10 @@ export default function Home() {
   }, [db]);
 
   async function getData() {
+    console.log("==============================");
     const result = await db.getAllAsync("SELECT * FROM recipes");
     setRecipes(result);
     console.log("RECIPES RESULT FROM GET DATA :", result);
-    const IngredientResult = await db.getAllAsync("SELECT * FROM ingredients");
-    setIngredients(IngredientResult);
-    console.log("ingrdients RESULT FROM GET DATA ", IngredientResult);
   }
   async function deleteRecipe(id) {
     db.withTransactionAsync(async () => {
@@ -32,33 +28,24 @@ export default function Home() {
     });
   }
   async function createRecipe(recipe) {
+    console.log("recipe from createRecipe", recipe);
+    return;
     db.withTransactionAsync(async () => {
-      const {
-        name,
-        description,
-        category,
-        healthyness,
-        images,
-        instructions,
-        ingredients,
-      } = recipe;
+      const { name, description, category, instructions, ingredients } = recipe;
       // Simple validation example
       if (
         !name ||
         !description ||
         !category ||
-        !healthyness ||
-        !images ||
         !instructions ||
-        !ingredients ||
         ingredients.length === 0
       ) {
         throw new Error("Missing required recipe information.");
       }
       // Insert into recipes table and get the inserted recipe's ID
       const result = await db.runAsync(
-        "INSERT INTO recipes (name, description, category, healthyness, images, instructions) VALUES (?, ?, ?, ?, ?, ?);",
-        [name, description, category, healthyness, images, instructions]
+        "INSERT INTO recipes (name, description, category, instructions) VALUES (?, ?, ?, ?);",
+        [name, description, category, instructions]
       );
       const recipeId = result.insertId; // Assuming this is how you get the newly inserted ID, adjust based on your DB API
 
@@ -80,8 +67,6 @@ export default function Home() {
       <CreateRecipeButtonAndModal createRecipe={createRecipe} />
       <Text style={styles.title}> All the recipes </Text>
       <RecipeList recipes={recipes} deleteRecipe={deleteRecipe} />
-
-      <IngredientList ingredients={ingredients} />
     </ScrollView>
   );
 }

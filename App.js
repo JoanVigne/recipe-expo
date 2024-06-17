@@ -1,8 +1,6 @@
 import * as React from "react";
 import { theme } from "./GlobalStyles";
-import * as SQLite from "expo-sqlite";
 import { SQLiteProvider } from "expo-sqlite/next";
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import * as FileSystem from "expo-file-system";
 import { Asset } from "expo-asset";
@@ -17,15 +15,19 @@ const loadDatabase = async () => {
 
   const dbUri = Asset.fromModule(dbAsset).uri;
   const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
-
-  const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
+  // Always create the directory and download the database
+  await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}SQLite`, {
+    intermediates: true,
+  });
+  await FileSystem.downloadAsync(dbUri, dbFilePath);
+  /*   const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
   if (!fileInfo.exists) {
     await FileSystem.makeDirectoryAsync(
       `${FileSystem.documentDirectory}SQLite`,
       { intermediates: true }
     );
     await FileSystem.downloadAsync(dbUri, dbFilePath);
-  }
+  } */
 };
 
 export default function App() {

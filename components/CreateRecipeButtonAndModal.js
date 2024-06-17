@@ -7,8 +7,9 @@ import {
   Button,
   View,
   ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
-import { Rating } from "react-native-ratings"; // You need to install react-native-ratings for the stars
 import { RadioButton } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import classicIngredients from "../utils/classicIngredients";
@@ -17,7 +18,6 @@ export default function RecipeModal({ createRecipe }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [recipeName, setRecipeName] = useState("");
   const [recipeCategory, setRecipeCategory] = useState(null);
-  const [recipeGrade, setRecipeGrade] = useState(0);
   const [ingredients, setIngredients] = useState([]);
   const [quant, setQuant] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
@@ -45,45 +45,46 @@ export default function RecipeModal({ createRecipe }) {
   const categoriesColumn1 = categories.slice(0, categories.length / 2);
   const categoriesColumn2 = categories.slice(categories.length / 2);
   const handleSubmit = () => {
-    console.log(
-      recipeName,
-      recipeGrade,
-      ingredients,
-      recipeInstructions,
-      secretPassword
-    );
+    // verification form ok
     if (
-      recipeName === "" ||
-      recipeCategory === null ||
-      recipeGrade === 0 ||
+      recipeName.trim() === "" ||
       ingredients.length === 0 ||
-      recipeInstructions === "" ||
-      // if you found this line, yes this is the password to create a recipe
-      secretPassword === "coco"
+      recipeInstructions.trim() === "" ||
+      secretPassword.trim() !== "coco"
     ) {
-      console.log("Please fill in all the fields");
       setErrorFormMessage(true);
       setTimeout(() => {
         setErrorFormMessage(false);
       }, 5000);
-
       return;
     }
+    // regrouping the ingredients and quantities and unit
+    const ingredientsAndGrammage = ingredients.map((ingredient, index) => ({
+      name: ingredient,
+      quantity: quants[index],
+      unit: selectedValues[index] || "gram",
+    }));
     const recipe = {
       name: recipeName,
-      category: recipeCategory,
-      grade: recipeGrade,
-      ingredients: ingredients,
+      ingredients: ingredientsAndGrammage,
       instructions: recipeInstructions,
       password: secretPassword,
     };
-
+    // function to send to db
     createRecipe(recipe);
+    // close modal
     setModalVisible(false);
   };
 
-  const handleAddIngredient = () => {
+  const addIngredient = () => {
+    Keyboard.dismiss();
     setIngredients([...ingredients, newIngredient]);
+    setNewIngredient("");
+    setFilteredSuggestions([]);
+  };
+  const addSuggestion = (suggestion) => {
+    Keyboard.dismiss();
+    setIngredients([...ingredients, suggestion]);
     setNewIngredient("");
     setFilteredSuggestions([]);
   };
@@ -99,7 +100,7 @@ export default function RecipeModal({ createRecipe }) {
     }
   };
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Button
         title="Create Recipe"
         style={styles.button}
@@ -117,44 +118,24 @@ export default function RecipeModal({ createRecipe }) {
                 placeholder="Recipe Name"
               />
             </View>
-            <Text>Category</Text>
-            <RadioButton.Group
-              onValueChange={(newValue) => setRecipeCategory(newValue)}
-              value={recipeCategory}
-            >
-              <View style={styles.containerRadioButton}>
-                <View style={styles.radioButtonColumn}>
-                  {categoriesColumn1.map((category, i) => (
-                    <View key={i} style={styles.radioButton}>
-                      <RadioButton value={category.value} />
-                      <Text>{category.label}</Text>
-                    </View>
-                  ))}
-                </View>
-                <View style={styles.radioButtonColumn}>
-                  {categoriesColumn2.map((category, i) => (
-                    <View key={i} style={styles.radioButton}>
-                      <RadioButton value={category.value} />
-                      <Text>{category.label}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            </RadioButton.Group>
-            <Text>Healthiness</Text>
-            <Rating
-              onFinishRating={setRecipeGrade}
-              style={{ paddingVertical: 10 }}
-            />
+            <View style={styles.containerInput}>
+              <TextInput
+                style={styles.input}
+                onChangeText={setSecretPassword}
+                value={secretPassword}
+                placeholder="Secret Password"
+                secureTextEntry
+              />
+            </View>
             <View style={styles.containerInputAndIngredients}>
               <View style={styles.ingredientInput}>
                 <TextInput
-                  style={styles.input}
+                  style={styles.inputSearchIngredient}
                   onChangeText={updateIngredientInput}
                   value={newIngredient}
                   placeholder="New Ingredient & grams"
                 />
-                <Button title="+" onPress={handleAddIngredient} />
+                <Button title="+" onPress={addIngredient} />
               </View>
               {filteredSuggestions.length <= 0 && ingredients.length > 0 && (
                 <View style={styles.ingredientList}>
@@ -201,35 +182,56 @@ export default function RecipeModal({ createRecipe }) {
               {filteredSuggestions.length > 0 && (
                 <ScrollView style={styles.suggestionsContainer}>
                   {filteredSuggestions.map((suggestion, index) => (
-                    <Text
-                      key={index}
-                      style={styles.suggestion}
-                      onPress={() => setNewIngredient(suggestion)}
-                    >
-                      {suggestion}
-                    </Text>
+                    <View key={index} style={styles.suggestionAndButton}>
+                      <Text
+                        style={styles.suggestion}
+                        onPress={() => setNewIngredient(suggestion)}
+                      >
+                        {suggestion}
+                      </Text>
+                      <Button
+                        title="+"
+                        onPress={() => addSuggestion(suggestion)}
+                      />
+                    </View>
                   ))}
                 </ScrollView>
               )}
             </View>
-            <View style={styles.containerInput}>
+            <View style={styles.containerTextArea}>
               <TextInput
-                style={styles.input}
+                style={styles.textArea}
                 onChangeText={setRecipeInstructions}
                 value={recipeInstructions}
                 placeholder="Instructions"
                 multiline
               />
             </View>
-            <View style={styles.containerInput}>
-              <TextInput
-                style={styles.input}
-                onChangeText={setSecretPassword}
-                value={secretPassword}
-                placeholder="Secret Password"
-                secureTextEntry
-              />
-            </View>
+            <Text>Category</Text>
+            <RadioButton.Group
+              onValueChange={(newValue) => setRecipeCategory(newValue)}
+              value={recipeCategory}
+            >
+              <View style={styles.containerRadioButton}>
+                <View style={styles.radioButtonColumn}>
+                  {categoriesColumn1.map((category, i) => (
+                    <View key={i} style={styles.radioButton}>
+                      <RadioButton value={category.value} />
+                      <Text>{category.label}</Text>
+                    </View>
+                  ))}
+                </View>
+                <View style={styles.radioButtonColumn}>
+                  {categoriesColumn2.map((category, i) => (
+                    <View key={i} style={styles.radioButton}>
+                      <RadioButton value={category.value} />
+                      <Text>{category.label}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </RadioButton.Group>
+
             <View
               style={{ flexDirection: "row", justifyContent: "space-around" }}
             >
@@ -248,7 +250,7 @@ export default function RecipeModal({ createRecipe }) {
           </View>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -269,7 +271,19 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   containerInput: {
-    width: 300,
+    width: 285,
+  },
+  containerTextArea: {
+    width: 275,
+    marginTop: 10,
+  },
+  textArea: {
+    height: 50,
+    borderColor: "gray",
+    borderWidth: 1,
+    padding: 10,
+    textAlignVertical: "top",
+    borderRadius: 3,
   },
   containerInputAndIngredients: {
     flexDirection: "column",
@@ -281,25 +295,39 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  inputSearchIngredient: {
+    height: 38,
+    margin: 5,
+    borderWidth: 1,
+    borderRadius: 3,
+    padding: 10,
+    width: 239,
+  },
   suggestionsContainer: {
     maxHeight: 100,
-    width: 200,
-    padding: 10,
+    width: 237,
+    paddingLeft: 5,
+    marginRight: 37,
     borderWidth: 1,
     borderColor: "black",
+  },
+  suggestionAndButton: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 2,
   },
   ingredientList: {
     flexDirection: "column",
     justifyContent: "space-around",
     padding: 2,
     width: 285,
-    height: 100,
+    minHeight: 100,
   },
   ContaineringredientAndQuant: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-
     borderColor: "green",
   },
   ingredient: {
@@ -312,6 +340,7 @@ const styles = StyleSheet.create({
   },
   quant: {
     width: 35,
+    height: 20,
     margin: "1%",
     paddingHorizontal: 5,
     borderWidth: 1,
@@ -322,7 +351,7 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     width: 40, // Increased size for better touch target
-    height: 30,
+    height: 20,
     justifyContent: "center",
     alignItems: "center",
     borderColor: "green",
@@ -348,10 +377,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-
+  // RADIO BUTTON CATEGORY
   containerRadioButton: {
     flexDirection: "row",
-    justifyContent: "space-between",
   },
   radioButtonColumn: {
     flexDirection: "column",
@@ -359,12 +387,12 @@ const styles = StyleSheet.create({
   radioButton: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 1,
   },
   input: {
     height: 35,
-    margin: 12,
+    margin: 5,
     borderWidth: 1,
+    borderRadius: 3,
     padding: 10,
     textAlign: "center",
   },
