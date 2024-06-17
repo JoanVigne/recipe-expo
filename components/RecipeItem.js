@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text, View } from "react-native";
+import {
+  Animated,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import { FontAwesome as Icon } from "@expo/vector-icons";
 import { theme } from "../GlobalStyles";
 
@@ -46,40 +52,39 @@ export default function RecipeItem({ recipe }) {
   };
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={handleRotate}>
       <View style={styles.containerText}>
-        <Text style={styles.text}>
-          {recipe.name}{" "}
-          <Text onPress={handleRotate}>
-            <Animated.View style={animatedStyles}>
-              <Icon
-                name={"arrow-down"}
-                type="font-awesome"
-                color={theme.colors.primary}
-              />
-            </Animated.View>
-            {isRotated ? "rotated ! " : "not"}
-          </Text>
-        </Text>
-        <Animated.View style={sizeAnimatedStyles}>
-          <Text style={styles.text}>{recipe.description}</Text>
-          <Text style={styles.text}>{recipe.instructions}</Text>
+        <Text style={styles.text}>{recipe.name} </Text>
+        <Animated.View style={animatedStyles}>
+          <Icon
+            style={styles.iconArrow}
+            name={"arrow-down"}
+            type="font-awesome"
+            color={theme.colors.primary}
+          />
         </Animated.View>
       </View>
-      <View>
-        <View>
-          <Text style={styles.text}>Ingredients:</Text>
-          {Object.entries(JSON.parse(recipe.ingredients)).map(
-            ([ingredient, details]) => (
-              <Text
-                key={ingredient}
-                style={styles.text}
-              >{`${ingredient}: ${details.quantity} ${details.unit}`}</Text>
-            )
+      <View style={styles.containerInstructionAndIngredients}>
+        <Animated.View style={sizeAnimatedStyles}>
+          <Text style={styles.text}>{recipe.instructions}</Text>
+        </Animated.View>
+        <Animated.View style={sizeAnimatedStyles}>
+          {isRotated && (
+            <View>
+              <Text style={styles.text}>Ingredients:</Text>
+              {Object.entries(JSON.parse(recipe.ingredients)).map(
+                ([ingredient, details]) => (
+                  <Text
+                    key={ingredient}
+                    style={styles.text}
+                  >{`${ingredient}: ${details.quantity} ${details.unit}`}</Text>
+                )
+              )}
+            </View>
           )}
-        </View>
+        </Animated.View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 const styles = StyleSheet.create({
@@ -88,14 +93,21 @@ const styles = StyleSheet.create({
     margin: 5,
     backgroundColor: theme.colors.sweet2,
     borderRadius: 5,
-    flexDirection: "row",
+    flexDirection: "column",
   },
   containerText: {
-    flexDirection: "column",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  containerInstructionAndIngredients: {
+    flexDirection: "row",
     justifyContent: "space-between",
   },
   text: {
     fontSize: 14,
     maxWidth: 200,
+  },
+  iconArrow: {
+    fontSize: 18,
   },
 });
