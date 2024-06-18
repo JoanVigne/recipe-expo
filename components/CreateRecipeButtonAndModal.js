@@ -68,7 +68,7 @@ export default function RecipeModal({ createRecipe }) {
       name: recipeName,
       ingredients: ingredientsAndGrammage,
       instructions: recipeInstructions,
-      password: secretPassword,
+      category: recipeCategory || "other",
     };
     // function to send to db
     createRecipe(recipe);

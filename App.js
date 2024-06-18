@@ -8,8 +8,9 @@ import { ActivityIndicator } from "react-native-paper";
 import Home from "./screens/Home";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
+import loadDatabase from "./utils/loadDatabase";
 const Stack = createNativeStackNavigator();
-const loadDatabase = async () => {
+/* const loadDatabase = async () => {
   const dbName = "myRecipeDB.db";
   const dbAsset = require("./assets/myRecipeDB.db");
 
@@ -20,24 +21,32 @@ const loadDatabase = async () => {
     intermediates: true,
   });
   await FileSystem.downloadAsync(dbUri, dbFilePath);
-  /*   const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
-  if (!fileInfo.exists) {
-    await FileSystem.makeDirectoryAsync(
-      `${FileSystem.documentDirectory}SQLite`,
-      { intermediates: true }
-    );
+  // Check if the database file already exists
+  const dbExists = await FileSystem.getInfoAsync(dbFilePath);
+
+  if (!dbExists.exists) {
+    // Download the database only if it does not exist
     await FileSystem.downloadAsync(dbUri, dbFilePath);
-  } */
-};
+    console.log("Database downloaded and set up.");
+  } else {
+    console.log("Database already exists, skipping download.");
+  }
+}; */
 
 export default function App() {
   const [dbLoaded, setDbLoaded] = React.useState(false);
-  const [dbData, setDbData] = React.useState(null);
 
   React.useEffect(() => {
-    loadDatabase()
-      .then(() => setDbLoaded(true))
-      .catch((e) => console.error(e));
+    const initializeDatabase = async () => {
+      try {
+        await loadDatabase();
+        setDbLoaded(true);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    initializeDatabase();
   }, []);
 
   if (!dbLoaded)

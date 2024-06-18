@@ -5,11 +5,12 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Button,
 } from "react-native";
 import { FontAwesome as Icon } from "@expo/vector-icons";
 import { theme } from "../GlobalStyles";
 
-export default function RecipeItem({ recipe }) {
+export default function RecipeItem({ recipe, deleteRecipe }) {
   const [isRotated, setIsRotated] = useState(false);
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const sizeAnim = useRef(new Animated.Value(0)).current;
@@ -67,19 +68,20 @@ export default function RecipeItem({ recipe }) {
       <View style={styles.containerInstructionAndIngredients}>
         <Animated.View style={sizeAnimatedStyles}>
           <Text style={styles.text}>{recipe.instructions}</Text>
+          <TouchableOpacity onPress={() => deleteRecipe(recipe.id)}>
+            <Icon name="trash" size={20} color={theme.colors.darkRed} />
+          </TouchableOpacity>
         </Animated.View>
         <Animated.View style={sizeAnimatedStyles}>
           {isRotated && (
             <View>
               <Text style={styles.text}>Ingredients:</Text>
-              {Object.entries(JSON.parse(recipe.ingredients)).map(
-                ([ingredient, details]) => (
-                  <Text
-                    key={ingredient}
-                    style={styles.text}
-                  >{`${ingredient}: ${details.quantity} ${details.unit}`}</Text>
-                )
-              )}
+              {JSON.parse(recipe.ingredients).map((ingredient) => (
+                <Text
+                  key={ingredient.name}
+                  style={styles.text}
+                >{`${ingredient.name}: ${ingredient.quantity} ${ingredient.unit}`}</Text>
+              ))}
             </View>
           )}
         </Animated.View>
@@ -109,5 +111,12 @@ const styles = StyleSheet.create({
   },
   iconArrow: {
     fontSize: 18,
+  },
+  smallButton: {
+    paddingHorizontal: 2,
+    paddingVertical: 2,
+    backgroundColor: "red",
+    borderRadius: 5,
+    width: 20,
   },
 });

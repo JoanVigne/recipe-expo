@@ -3,6 +3,7 @@ export const theme = {
     sweet: "#BED3C3",
     sweet2: "#f8e0dc",
     danger: "#CE6A6B",
+    darkRed: "#D32F2F",
     button: "#4A919E",
     whiteText: "#F5F5F5",
     dark: "#212E53",
