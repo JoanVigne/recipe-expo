@@ -5,11 +5,23 @@ import { useSQLiteContext } from "expo-sqlite/next";
 import RecipeList from "../components/RecipeList";
 import { theme } from "../GlobalStyles";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
+import CategoryRadioButtonGroup from "../components/CategoryRadioButtonGroup";
 
 export default function Home() {
   const [recipes, setRecipes] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [recipeIdToDelete, setRecipeIdToDelete] = useState(null);
+  const [recipeCategory, setRecipeCategory] = useState(null);
+
+  const filterRecipes = () => {
+    console.log("recipes", recipes);
+    if (recipeCategory === "All" || recipeCategory === null) {
+      return recipes;
+    }
+    return recipes.filter((recipe) => recipe.category === recipeCategory);
+  };
+  const filteredRecipes = filterRecipes(); // Call the function and store its return value.
+  console.log("filteredRecipes", filteredRecipes); // Log the result of calling the function.
   function promptDeleteRecipe(id) {
     setRecipeIdToDelete(id);
     setIsModalVisible(true);
@@ -25,7 +37,7 @@ export default function Home() {
     console.log("==============================");
     const result = await db.getAllAsync("SELECT * FROM recipes");
     setRecipes(result);
-    console.log("RECIPES RESULT FROM GET DATA :", result);
+    /*    console.log("RECIPES RESULT FROM GET DATA :", result); */
   }
 
   async function createRecipe(recipe) {
@@ -77,28 +89,25 @@ export default function Home() {
     // Close modal and reset state
     setIsModalVisible(false);
     setRecipeIdToDelete(null);
-    /*     if(recipeIdToDelte){
-      
-    }
-    try {
-      await db.withTransactionAsync(async () => {
-        const result = await db.runAsync("DELETE FROM recipes WHERE id = ?;", [
-          id,
-        ]);
-        console.log("Delete result:", result);
-        await getData();
-      });
-    } catch (error) {
-      console.error("Failed to delete recipe:", error);
-      throw error;
-    } */
   }
 
   return (
     <ScrollView style={styles.container}>
       <CreateRecipeButtonAndModal createRecipe={createRecipe} />
-      <Text style={styles.title}> All the recipes </Text>
-      <RecipeList recipes={recipes} deleteRecipe={promptDeleteRecipe} />
+      <Text style={styles.title}>
+        {recipeCategory !== "All"
+          ? `The ${recipeCategory}s`
+          : "All the recipes"}
+      </Text>
+      <CategoryRadioButtonGroup
+        selectedCategory={recipeCategory}
+        setSelectedCategory={setRecipeCategory}
+        needAllCategories={true}
+      />
+      <RecipeList
+        recipes={filteredRecipes ? filteredRecipes : recipes}
+        deleteRecipe={promptDeleteRecipe}
+      />
       <DeleteConfirmModal
         isVisible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}

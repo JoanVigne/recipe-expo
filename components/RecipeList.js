@@ -12,9 +12,6 @@ export default function RecipeList({ recipes, deleteRecipe, createRecipe }) {
             onLongPress={() => console.log("long press")}
           >
             <RecipeItem recipe={recipe} deleteRecipe={deleteRecipe} />
-
-            {/*   <Text>{recipe.name}</Text>
-            <Text>{recipe.instructions}</Text> */}
           </TouchableOpacity>
         );
       })}

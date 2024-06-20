@@ -1,6 +1,6 @@
 const categories = [
-  { label: "Entrance", value: "entrance" },
-  { label: "Main dish", value: "main_dish" },
+  { label: "Starter", value: "starter" },
+  { label: "Main", value: "main" },
   { label: "Dessert", value: "dessert" },
   { label: "Snack", value: "snack" },
   { label: "Side", value: "side" },

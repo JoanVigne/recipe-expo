@@ -8,12 +8,13 @@ import {
   View,
   ScrollView,
   Keyboard,
-  TouchableWithoutFeedback,
 } from "react-native";
-import { RadioButton } from "react-native-paper";
+/* import { RadioButton } from "react-native-paper"; */
 import { Picker } from "@react-native-picker/picker";
 import classicIngredients from "../utils/classicIngredients";
 import categories from "../utils/categories";
+import CategoryRadioButtonGroup from "./CategoryRadioButtonGroup";
+
 export default function RecipeModal({ createRecipe }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [recipeName, setRecipeName] = useState("");
@@ -41,9 +42,12 @@ export default function RecipeModal({ createRecipe }) {
     newQuants[index] = text;
     setQuants(newQuants);
   };
+  const columnSize = Math.ceil(categories.length / 3);
+  // Step 2: Create three columns
+  const categoriesColumn1 = categories.slice(0, columnSize);
+  const categoriesColumn2 = categories.slice(columnSize, 2 * columnSize);
+  const categoriesColumn3 = categories.slice(2 * columnSize); // This will automatically go to the end of the array
 
-  const categoriesColumn1 = categories.slice(0, categories.length / 2);
-  const categoriesColumn2 = categories.slice(categories.length / 2);
   const handleSubmit = () => {
     // verification form ok
     if (
@@ -101,11 +105,7 @@ export default function RecipeModal({ createRecipe }) {
   };
   return (
     <ScrollView style={styles.container}>
-      <Button
-        title="Create Recipe"
-        style={styles.button}
-        onPress={() => setModalVisible(true)}
-      />
+      <Button title="Create Recipe" onPress={() => setModalVisible(true)} />
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <View>
           <View style={styles.modalView}>
@@ -208,7 +208,7 @@ export default function RecipeModal({ createRecipe }) {
               />
             </View>
             <Text>Category</Text>
-            <RadioButton.Group
+            {/*   <RadioButton.Group
               onValueChange={(newValue) => setRecipeCategory(newValue)}
               value={recipeCategory}
             >
@@ -229,9 +229,22 @@ export default function RecipeModal({ createRecipe }) {
                     </View>
                   ))}
                 </View>
+                <View style={styles.radioButtonColumn}>
+                  {categoriesColumn3.map((category, i) => (
+                    <View key={i} style={styles.radioButton}>
+                      <RadioButton value={category.value} />
+                      <Text>{category.label}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
             </RadioButton.Group>
-
+ */}
+            <CategoryRadioButtonGroup
+              selectedCategory={recipeCategory}
+              setSelectedCategory={setRecipeCategory}
+              needAllCategories={false}
+            />
             <View
               style={{ flexDirection: "row", justifyContent: "space-around" }}
             >
@@ -257,7 +270,7 @@ export default function RecipeModal({ createRecipe }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 15,
+    margin: 25,
   },
   title: {
     marginBottom: 15,
@@ -378,7 +391,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   // RADIO BUTTON CATEGORY
-  containerRadioButton: {
+  /*   containerRadioButton: {
     flexDirection: "row",
   },
   radioButtonColumn: {
@@ -387,7 +400,8 @@ const styles = StyleSheet.create({
   radioButton: {
     flexDirection: "row",
     alignItems: "center",
-  },
+    width: 90,
+  }, */
   input: {
     height: 35,
     margin: 5,
